@@ -1,14 +1,13 @@
-from utils.variables import bqm
 from utils.variables import c_xnor
 
 
-def quantum_not(name,val1):
+def quantum_not(bqm, name, val1):
     new_name = "n-" + name
     bqm.add_variable(new_name, 2*val1)
     return [new_name]
 
 
-def xnor(name1, name2, w, x=0.0, c_reinforcement=c_xnor):
+def xnor(bqm, name1, name2, w, x=0.0, c_reinforcement=c_xnor):
     # define names for ancillas
     name_ancilla1 = "an1-" + name1 + "-" + name2
     name_ancilla2 = "an2-" + name1 + "-" + name2

@@ -1,13 +1,13 @@
-from utils.variables import bqm, c_summation
+from utils.variables import c_summation
 from logic_gates.quantum_gates import xnor
-from utils.tools import get_random_identifier
+
 
 """
 Operands do not contain target!!!
 """
 
 
-def weak_summation(operands, bqm):
+def weak_summation(bqm, operands):
     """
     This function uses an environment variable c_summation that ensures
     that make qubits "agree" with each other.
@@ -22,10 +22,8 @@ def weak_summation(operands, bqm):
         for j in range(i + 1, len(temp_operands)):
             bqm.add_interaction(temp_operands[i][0], temp_operands[j][0], c_summation)
 
-    return bqm
 
-
-def strong_summation(operands, target, bqm):
+def strong_summation(bqm, operands, target):
     """
     This uses the own qubit weight to establish entanglement towards a target qubit.
 
@@ -37,11 +35,10 @@ def strong_summation(operands, target, bqm):
     """
     for key, value in operands.items():
         if key != target:
-            bqm.add_interaction(key, target, value)
-    return bqm
+            bqm.add_interaction(key, target, -abs(value))
 
 
-def quantum_sigmoid_sum(operands, name_target, bqm):
+def quantum_sigmoid_sum(bqm, operands, name_target):
     """
     it sets the operands force fields, to later apply weak summation
     and strong summation
@@ -52,24 +49,23 @@ def quantum_sigmoid_sum(operands, name_target, bqm):
     """
 
     for key, value in operands.items():
-        bqm.add_variable(key, value)
+        bqm.add_variable(key, -value)
 
     # put target in perfect superposition state
     bqm.add_variable(name_target, 0.0)
 
-    bqm = weak_summation(operands)
-    bqm = strong_summation(operands, name_target)
-    return bqm
+    weak_summation(bqm, operands)
+    strong_summation(bqm, operands, name_target)
 
 
-def multiplication(name1, name2, val1, val2):
-    return xnor(name1, name2, val1, val2)
+def multiplication(bqm, name1, name2, val1, val2):
+    return xnor(bqm, name1, name2, val1, val2)
 
 
 # matrix operations
 
 
-def matrix_vector_multiplication(matrix_names, weights, arr_names, arr_value=None):
+def matrix_vector_multiplication(bqm, matrix_names, weights, arr_names, arr_value=None):
     if arr_value is None:
         arr_value = [0.0 for _ in range(len(weights[0]))]
     assert len(matrix_names[0]) == len(arr_names)

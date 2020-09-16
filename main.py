@@ -5,13 +5,15 @@
 
 from logic_gates.quantum_gates import quantum_not
 from random import seed
-from tests.simple_operations import longest_run_sum
+from tests.simple_operations import longest_run_sum, sum_simulated_test
+from tests.simple_operations import sum_quantum_test
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     seed(11)
     # TESTS
     # longest_run_sum()
-
+    sum_simulated_test()
+    # sum_quantum_test()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

@@ -2,17 +2,23 @@ from . import variables
 import dimod
 import random
 from random import randint
+import neal
 
 
 def reset_default(bqm):
     variables.c_y = 100.0
     variables.c_summation = 0.75
     variables.c_xnor = -0.25
-    bqm = dimod.BinaryQuadraticModel.empty(dimod.BINARY)
+    bqm = dimod.BinaryQuadraticModel.empty(dimod.SPIN)
 
 
-def clean_workspace(bqm):
-    bqm = dimod.BinaryQuadraticModel.empty(dimod.BINARY)
+def get_bqm():
+    bqm = dimod.BinaryQuadraticModel.empty(dimod.SPIN)
+    return bqm
+
+
+def get_simulated_sampler():
+    return neal.SimulatedAnnealingSampler()
 
 
 def get_random_identifier(length=10):
