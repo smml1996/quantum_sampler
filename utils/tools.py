@@ -26,11 +26,36 @@ def get_random_identifier(length=10):
     return identifier
 
 
+def get_random_number():
+    return randint(-variables.abs_numbers_range, variables.abs_numbers_range)
+
+
+def get_random_matrix(n, m, is_binary=False):
+    names = []
+    weights = []
+    temp = 0
+    for i in range(n):
+        names.append([])
+        weights.append([])
+        for j in range(m):
+            names[len(names)-1].append(get_random_identifier(5))
+            temp = get_random_number()
+            if is_binary:
+                if temp > 0:
+                    temp = 1
+                else:
+                    temp = -1
+            weights[len(weights)-1].append(temp)
+
+    return names, weights
+
+
 def get_random_dict(size):
     ans = dict()
     for i in range(size):
-        ans[get_random_identifier()] = randint(-variables.abs_numbers_range, variables.abs_numbers_range)
+        ans[get_random_identifier()] = get_random_number()
     return ans
+
 
 def plot_2d(labex, labely, x, y):
     pass

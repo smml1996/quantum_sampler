@@ -5,15 +5,27 @@
 
 from logic_gates.quantum_gates import quantum_not
 from random import seed
-from tests.simple_operations import longest_run_sum, sum_simulated_test
-from tests.simple_operations import sum_quantum_test
+from tests.simple_operations import longest_run_sum, sum_simulated_test, quantum_mult_sum, simulated_mult_sum_avg
+from utils.variables import qpu
+from tests.simple_operations import sign_extraction_test, quantum_sign_test, simulated_mult_sum
+# from tests.simple_operations import sum_quantum_test
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    #print(qpu.sampler)
     seed(11)
     # TESTS
+
     # longest_run_sum()
-    sum_simulated_test()
+
+    # sum_simulated_test()
     # sum_quantum_test()
+
+    # sign_extraction_test()
+    # quantum_sign_test()
+
+    # simulated_mult_sum()
+    simulated_mult_sum_avg()
+    # quantum_mult_sum()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

@@ -1,13 +1,19 @@
 from utils.variables import c_xnor
-
+import dimod
 
 def quantum_not(bqm, name, val1):
     new_name = "n-" + name
-    bqm.add_variable(new_name, 2*val1)
+    bqm.add_variable(new_name, val1)
     return [new_name]
 
 
-def xnor(bqm, name1, name2, w, x=0.0, c_reinforcement=c_xnor):
+def xnor(bqm, name1, name2, w, x=-1, c_reinforcement=c_xnor):
+    # turn variable x propitious to Ising model
+    if x <= 0:
+        x = -1
+    else:
+        x = 1
+
     # define names for ancillas
     name_ancilla1 = "an1-" + name1 + "-" + name2
     name_ancilla2 = "an2-" + name1 + "-" + name2
@@ -17,11 +23,13 @@ def xnor(bqm, name1, name2, w, x=0.0, c_reinforcement=c_xnor):
 
     # add operands
     bqm.add_variable(name1, -2*w)
-    bqm.add_variable(name2, -2*x)
+    bqm.add_variable(name2, -2 * x * abs(w))
+
+
 
     # add and define negated operands
-    negated1 = quantum_not(name1, w)[0]
-    negated2 = quantum_not(name2, x)[0]
+    negated1 = quantum_not(bqm, name1, 2*w)[0]
+    negated2 = quantum_not(bqm, name2, 2 * x * abs(w))[0]
 
     # add ancillas
     bqm.add_variable(name_ancilla1, -abs(w))
@@ -43,7 +51,7 @@ def xnor(bqm, name1, name2, w, x=0.0, c_reinforcement=c_xnor):
     bqm.add_interaction(name_ancilla2, name_res, abs(w))
 
     # reinforce ancillas
-    bqm.add_interaction(name_ancilla1, name_ancilla1, c_reinforcement)
+    bqm.add_interaction(name_ancilla1, name_ancilla2, c_reinforcement)
 
     return [name_res]
 

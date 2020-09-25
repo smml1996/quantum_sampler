@@ -1,4 +1,4 @@
-from utils.variables import c_summation
+from utils import variables
 from logic_gates.quantum_gates import xnor
 
 
@@ -7,7 +7,7 @@ Operands do not contain target!!!
 """
 
 
-def weak_summation(bqm, operands):
+def weak_summation(bqm, operands, c_summation=variables.c_summation):
     """
     This function uses an environment variable c_summation that ensures
     that make qubits "agree" with each other.
@@ -38,7 +38,7 @@ def strong_summation(bqm, operands, target):
             bqm.add_interaction(key, target, -abs(value))
 
 
-def quantum_sigmoid_sum(bqm, operands, name_target):
+def quantum_sigmoid_sum(bqm, operands, name_target, set_operands=True,c_summation=variables.c_summation):
     """
     it sets the operands force fields, to later apply weak summation
     and strong summation
@@ -47,34 +47,33 @@ def quantum_sigmoid_sum(bqm, operands, name_target):
     :param name_target: string, qubit name where the result is saved
     :return: bqm
     """
-
-    for key, value in operands.items():
-        bqm.add_variable(key, -value)
+    if set_operands:
+        for key, value in operands.items():
+            bqm.add_variable(key, -value)
 
     # put target in perfect superposition state
     bqm.add_variable(name_target, 0.0)
 
-    weak_summation(bqm, operands)
+    weak_summation(bqm, operands, c_summation=c_summation)
     strong_summation(bqm, operands, name_target)
 
 
-def multiplication(bqm, name1, name2, val1, val2):
-    return xnor(bqm, name1, name2, val1, val2)
+def multiplication(bqm, name1, name2, val1, val2, c_reinforcement=variables.c_xnor):
+    return xnor(bqm, name1, name2, val1, val2, c_reinforcement)
 
 
 # matrix operations
-
-
-def matrix_vector_multiplication(bqm, matrix_names, weights, arr_names, arr_value=None):
+def matrix_vector_multiplication(bqm, matrix_names, weights, arr_names, arr_value=None, c_reinforcement=variables.c_xnor):
     if arr_value is None:
         arr_value = [0.0 for _ in range(len(weights[0]))]
     assert len(matrix_names[0]) == len(arr_names)
 
     operands = dict()
+
     for i in range(len(matrix_names)):
-        for j in range(len(matrix_names)):
-            bqm.add_variable(matrix_names[i][j], weights[i][j])
-            bqm.add_variable(arr_names[j], arr_value[j])
-            temp_res = multiplication(matrix_names[i][j], arr_names[j], weights[i][j], arr_value[j])
+        for j in range(len(matrix_names[0])):
+            # bqm.add_variable(matrix_names[i][j], weights[i][j])
+            # bqm.add_variable(arr_names[j], arr_value[j])
+            temp_res = multiplication(bqm, matrix_names[i][j], arr_names[j], weights[i][j], arr_value[j], c_reinforcement=c_reinforcement)
             operands[temp_res[0]] = weights[i][j]
-    return operands
+    return [operands]

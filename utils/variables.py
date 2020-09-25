@@ -6,12 +6,12 @@ import neal
 
 # Proposal constants
 c_y = 100.0
-c_summation = 0.8
-c_xnor = -0.25
+c_summation = 0.25
+c_xnor = -0.8
 
 # utils
 letters = string.ascii_letters
-abs_numbers_range = 100000
+abs_numbers_range = 100
 qpu = DWaveSampler(solver={'qpu': True})
 simulated_sampler = neal.SimulatedAnnealingSampler()
 
