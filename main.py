@@ -25,7 +25,7 @@ if __name__ == '__main__':
     # quantum_sign_test()
 
     # simulated_mult_sum()
-    simulated_mult_sum_avg()
-    # quantum_mult_sum()
+    # simulated_mult_sum_avg()
+    quantum_mult_sum()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

@@ -264,11 +264,11 @@ def simulated_mult_sum_avg():
     f.write("x;y;z\n")
 
     coeffs = []
-    temp = -10
-    while temp<=10:
+    temp = -5
+    while temp<=5:
         coeffs.append(temp)
         temp+=0.25
-    num_subtests = 100
+    num_subtests = 10
 
     accum_precision = 0
 
@@ -318,8 +318,8 @@ def simulated_mult_sum_avg():
 def quantum_mult_sum():
     f = open("./results/quantum_mult_sum.csv", "w")
     f.write("num_subtests;m;precision\n")
-    f1 = open("./results/quantum_energy.csv", "w")
-    f1.write("precision;energy;occurences\n")
+    # f1 = open("./results/quantum_energy.csv", "w")
+    # f1.write("precision;energy;occurences\n")
     num_subtests = 10
     for i in range(2, 10):
         precision = 0
@@ -348,15 +348,15 @@ def quantum_mult_sum():
             quantum_sigmoid_sum(bqm, operands, "target", set_operands=False)
             sampler = EmbeddingComposite(qpu)
 
-            result = sampler.sample(bqm, num_reads=1000)
+            result = sampler.sample(bqm, num_reads=1200)
 
             if result.first.sample["target"] == real_result:
                 precision += 1
-                f1.write("1;")
-            else:
-                f1.write("0;")
+                #f1.write("1;")
+            #else:
+            #    f1.write("0;")
                 # print(real_result, result.first.sample["target"], result)
-            f1.write(str(result.first.energy))
-            f1.write(";"+str(result.first.num_occurrences/1000*100)+"\n")
+            #f1.write(str(result.first.energy))
+            #f1.write(";"+str(result.first.num_occurrences/1000*100)+"\n")
         print(precision/num_subtests)
         f.write(str(num_subtests) + ";" + str(i) + ";" + str(precision/num_subtests) + "\n")
