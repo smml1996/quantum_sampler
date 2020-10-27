@@ -59,3 +59,14 @@ def get_random_dict(size):
 
 def plot_2d(labex, labely, x, y):
     pass
+
+
+def get_names(matrix, prefix):
+    ans = []
+    for i_row in len(matrix):
+        temp = []
+        for i_element in len(matrix[i_row]):
+            temp.append(prefix + "_" + str(i_row) + str(i_element))
+
+        ans.append(temp)
+    return ans

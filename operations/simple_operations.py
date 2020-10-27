@@ -68,12 +68,16 @@ def matrix_vector_multiplication(bqm, matrix_names, weights, arr_names, arr_valu
         arr_value = [0.0 for _ in range(len(weights[0]))]
     assert len(matrix_names[0]) == len(arr_names)
 
-    operands = dict()
+    result = []
 
     for i in range(len(matrix_names)):
+        operands = dict()
         for j in range(len(matrix_names[0])):
             # bqm.add_variable(matrix_names[i][j], weights[i][j])
             # bqm.add_variable(arr_names[j], arr_value[j])
             temp_res = multiplication(bqm, matrix_names[i][j], arr_names[j], weights[i][j], arr_value[j], c_reinforcement=c_reinforcement)
             operands[temp_res[0]] = weights[i][j]
-    return [operands]
+
+        result.append(operands)
+    # return [operands]
+    return [result]
