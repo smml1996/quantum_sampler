@@ -3,6 +3,7 @@ import dimod
 import random
 from random import randint
 import neal
+import numbers
 
 
 def reset_default(bqm):
@@ -60,12 +61,14 @@ def get_random_dict(size):
 def plot_2d(labex, labely, x, y):
     pass
 
-
 def get_names(matrix, prefix):
     ans = []
-    for i_row in len(matrix):
+    for i_row in range(len(matrix)):
+        if isinstance(matrix[i_row], numbers.Number):
+            ans.append(prefix + "_" + str(i_row) )
+            continue
         temp = []
-        for i_element in len(matrix[i_row]):
+        for i_element in range(len(matrix[i_row])):
             temp.append(prefix + "_" + str(i_row) + str(i_element))
 
         ans.append(temp)

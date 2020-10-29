@@ -7,7 +7,8 @@ from hybrid.reference.kerberos import KerberosSampler
 
 class Quantum_Sampler:
     def __init__(self, timesteps, weights, x_t0, bias,
-                 c_summation=variables.c_summation, c_xnor=variables.c_xnor, c_y=variables.c_y, convergence=3, type="workflow1"):
+                 c_summation=variables.c_summation, c_xnor=variables.c_xnor, c_y=variables.c_y, convergence=3,
+                    workflow="kerberos", is_write_result=True):
         self.timesteps = timesteps
         self.weights = weights
         self.x = x_t0
@@ -19,12 +20,13 @@ class Quantum_Sampler:
         self.bqm = get_bqm()
         self.convergence = convergence
         self.type = type
+        self.is_write_result = is_write_result
+        self.workflow = workflow
 
     def build_t0(self):
         prefix = "t0"
         matrix_names = get_names(self.weights, prefix + "w")
         x_names = get_names(self.x, prefix+"x")
-        x_names = x_names[0]
 
         # perform multiplication
         operands = matrix_vector_multiplication(self.bqm, matrix_names, self.weights, x_names, arr_value=self.x)[0]
@@ -32,6 +34,7 @@ class Quantum_Sampler:
 
         # perform summation
         for i in range(len(operands)):
+            operands[i]["t0_b" + str(i)] = self.bias[i]
             quantum_sigmoid_sum(self.bqm, operands[i], "t0_target" + str(i), set_operands=False)
             x_next.append("t0_target" + str(i))
 
@@ -55,6 +58,7 @@ class Quantum_Sampler:
 
         # perform summation
         for i in range(len(operands)):
+            operands[i]["t"+str(t_index)+"_b" + str(i)] = self.bias[i]
             quantum_sigmoid_sum(self.bqm, operands[i], prefix + "_target" + str(i), set_operands=False)
             x_next.append(prefix + "_target" + str(i))
 
@@ -75,15 +79,32 @@ class Quantum_Sampler:
         for i in range(self.timesteps-1):
             prefix = str(i+1)
             x_names = get_names([0 for _ in self.x], prefix + "x")
-            x_names = x_names[0]
             self.join_steps(x_next, x_names)
             x_next = self.build_t(x_names, i)
             read_values.append(x_next)
         return read_values
 
-    def execute(self):
+    def read_result(self, result, read_values):
+        print(read_values)
+        f = None
+        if self.is_write_result:
+            f = open("./results/output.txt", "w")
+        ans = []
+        for i in range(len(read_values)):
+            temp = []
+            for j in range(len(read_values[i])):
+                if self.is_write_result:
+                    f.write(str(result[read_values[i][j]]) + "\t")
+                temp.append(result[read_values[i][j]])
+            if self.is_write_result:
+                f.write("\n")
+            ans.append(temp)
+        print(ans)
+        return ans
 
-        if type == 'workflow1':
+    def execute(self):
+        read_values = self.build_model()
+        if self.workflow == 'workflow1':
             subproblem = hybrid.EnergyImpactDecomposer(size=60)
             subsampler = hybrid.QPUSubproblemAutoEmbeddingSampler() | hybrid.SplatComposer()
 
@@ -96,9 +117,10 @@ class Quantum_Sampler:
 
             init_state = hybrid.State.from_problem(self.bqm)
             result = workflow.run(init_state).result().samples.first
-            return result
-        elif type == 'kerberos':
-            result = KerberosSampler().sample(self.bqm)
-            return result
+            return self.read_result(result, read_values)
+        elif self.workflow == 'kerberos':
+            result = KerberosSampler().sample(self.bqm).first.sample
+            print(result)
+            return self.read_result(result, read_values)
         else:
             raise Exception("not valid sampler. Valid options: workflow1, kerberos")
