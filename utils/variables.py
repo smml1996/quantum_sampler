@@ -8,6 +8,7 @@ import neal
 c_y = 100.0
 c_summation = 0.25
 c_xnor = -0.25
+c_t = -100.0
 
 # utils
 letters = string.ascii_letters

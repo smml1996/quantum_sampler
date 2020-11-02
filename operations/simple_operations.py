@@ -1,4 +1,5 @@
 from utils import variables
+
 from logic_gates.quantum_gates import xnor
 
 
@@ -38,11 +39,13 @@ def strong_summation(bqm, operands, target):
             bqm.add_interaction(key, target, -abs(value))
 
 
-def quantum_sigmoid_sum(bqm, operands, name_target, set_operands=True,c_summation=variables.c_summation):
+def quantum_sigmoid_sum(bqm, operands, name_target, set_operands=True, c_summation=variables.c_summation):
     """
     it sets the operands force fields, to later apply weak summation
     and strong summation
 
+    :param c_summation:
+    :param set_operands:
     :param operands: dictionary with qubits names -> real value (force-fields)
     :param name_target: string, qubit name where the result is saved
     :return: bqm
@@ -66,6 +69,7 @@ def multiplication(bqm, name1, name2, val1, val2, c_reinforcement=variables.c_xn
 def matrix_vector_multiplication(bqm, matrix_names, weights, arr_names, arr_value=None, c_reinforcement=variables.c_xnor):
     if arr_value is None:
         arr_value = [0.0 for _ in range(len(weights[0]))]
+    print(len(matrix_names[0]), len(arr_names))
     assert len(matrix_names[0]) == len(arr_names)
 
     result = []
@@ -75,7 +79,8 @@ def matrix_vector_multiplication(bqm, matrix_names, weights, arr_names, arr_valu
         for j in range(len(matrix_names[0])):
             # bqm.add_variable(matrix_names[i][j], weights[i][j])
             # bqm.add_variable(arr_names[j], arr_value[j])
-            temp_res = multiplication(bqm, matrix_names[i][j], arr_names[j], weights[i][j], arr_value[j], c_reinforcement=c_reinforcement)
+            temp_res = multiplication(bqm, matrix_names[i][j], arr_names[j], weights[i][j], arr_value[j],
+                                      c_reinforcement=c_reinforcement)
             operands[temp_res[0]] = weights[i][j]
 
         result.append(operands)
