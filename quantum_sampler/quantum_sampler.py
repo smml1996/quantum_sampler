@@ -1,13 +1,16 @@
 from utils import variables
 from utils.tools import get_bqm
 from utils.tools import get_names
+from utils.tools import get_simulated_sampler
 from operations.simple_operations import quantum_sigmoid_sum, multiplication, matrix_vector_multiplication
 import hybrid
 from hybrid.reference.kerberos import KerberosSampler
+import dimod
+
 
 class Quantum_Sampler:
     def __init__(self, timesteps, weights, x_t0, bias,
-                 c_summation=variables.c_summation, c_xnor=variables.c_xnor, c_y=variables.c_y, convergence=3,
+                 c_summation=variables.c_summation, c_xnor=variables.c_xnor, c_y=variables.c_y, c_t=variables.c_t,convergence=3,
                     workflow="kerberos", is_write_result=True):
         self.timesteps = timesteps
         self.weights = weights
@@ -17,9 +20,10 @@ class Quantum_Sampler:
         self.c_summation = c_summation
         self.c_xnor = c_xnor
         self.c_y = c_y
+        self.c_t = c_t
         self.bqm = get_bqm()
         self.convergence = convergence
-        self.type = type
+        self.type = workflow
         self.is_write_result = is_write_result
         self.workflow = workflow
 
@@ -39,10 +43,11 @@ class Quantum_Sampler:
             x_next.append("t0_target" + str(i))
 
         # ensure to pick one
-        for i in range(len(x_next)):
-            for j in range(i+1, len(x_next)):
-                self.bqm.add_interaction(x_next[i], x_next[j], self.c_y)
-
+        #for i in range(len(x_next)):
+        #    for j in range(i, len(x_next)):
+        #        self.bqm.add_interaction(x_next[i], x_next[j], self.c_y)
+        self.bqm.update(dimod.generators.combinations(x_next, 1,
+                                                  strength=self.c_y))
         return x_next
 
     def build_t(self, x_names, t_index):
@@ -62,15 +67,17 @@ class Quantum_Sampler:
             quantum_sigmoid_sum(self.bqm, operands[i], prefix + "_target" + str(i), set_operands=False)
             x_next.append(prefix + "_target" + str(i))
 
-        # ensure to pick one
-        for i in range(len(x_next)):
-            for j in range(i+1, len(x_next)):
-                self.bqm.add_interaction(x_next[i], x_next[j], self.c_y)
+        # pick one for each timestep
+        #for i in range(len(x_next)):
+        #    for j in range(len(x_next)):
+        #        self.bqm.add_interaction(x_next[i], x_next[j], self.c_y)
+        self.bqm.update(dimod.generators.combinations(x_next, 1,
+                                                      strength=self.c_y))
         return x_next
 
     def join_steps(self, prev, next):
         for i in range(len(prev)):
-            self.bqm.add_interaction(prev[i], next[i], self.c_y)
+            self.bqm.add_interaction(prev[i], next[i], self.c_t)
 
     def build_model(self):
         read_values = []
@@ -85,7 +92,6 @@ class Quantum_Sampler:
         return read_values
 
     def read_result(self, result, read_values):
-        print(read_values)
         f = None
         if self.is_write_result:
             f = open("./results/output.txt", "w")
@@ -99,7 +105,7 @@ class Quantum_Sampler:
             if self.is_write_result:
                 f.write("\n")
             ans.append(temp)
-        print(ans)
+        # print(ans)
         return ans
 
     def execute(self):
@@ -120,7 +126,10 @@ class Quantum_Sampler:
             return self.read_result(result, read_values)
         elif self.workflow == 'kerberos':
             result = KerberosSampler().sample(self.bqm).first.sample
-            print(result)
+            return self.read_result(result, read_values)
+        elif self.workflow == 'simulated':
+            sampler = get_simulated_sampler()
+            result = sampler.sample(self.bqm).first.sample
             return self.read_result(result, read_values)
         else:
-            raise Exception("not valid sampler. Valid options: workflow1, kerberos")
+            raise Exception("not valid sampler. Valid options: workflow1, kerberos, simulated")

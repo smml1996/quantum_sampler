@@ -5,6 +5,7 @@ from random import randint
 import neal
 import numbers
 
+ALLOW_FALSE_POSITIVE = True
 
 def reset_default(bqm):
     variables.c_y = 100.0
@@ -58,9 +59,6 @@ def get_random_dict(size):
     return ans
 
 
-def plot_2d(labex, labely, x, y):
-    pass
-
 def get_names(matrix, prefix):
     ans = []
     for i_row in range(len(matrix)):
@@ -73,3 +71,65 @@ def get_names(matrix, prefix):
 
         ans.append(temp)
     return ans
+
+
+def evaluate_affine(w, x, b):
+    temp = []
+    for row in w:
+        suma = 0
+        for i in range(len(x)):
+            suma += x[i]*row[i]
+        temp.append(suma)
+
+    curr_max = None
+
+    for i in range(len(b)):
+        temp[i] += b[i]
+        if i == 0:
+            curr_max = temp[i]
+        else:
+            curr_max = max(temp[i], curr_max)
+    result = []
+
+    for element in temp:
+        if element == curr_max:
+            result.append(1)
+        else:
+            result.append(-1)
+    return result
+
+
+def evaluate_rnn(t, w, x, b):
+    ans = []
+    last = x
+    for i in range(t):
+        actual = evaluate_affine(w, last, b)
+        ans.append(actual)
+        last = actual
+    return ans
+
+
+def get_score(real, annealed):
+    assert(len(real) == len(annealed))
+    assert(len(real[0]) == len(annealed[0]))
+
+    score = 0.0
+
+    for i in range(len(real)):
+        for j in range(len(real[0])):
+            if real[i][j] == 1:
+                score += 1
+            elif annealed[i][j] == -1:
+                score += 1
+
+    return score/(len(real) * len(real[0]))
+
+
+def compare_answers(annealed, t, w, x, b):
+    real = evaluate_rnn(t, w, x, b)
+    return get_score(real, annealed)
+
+
+
+
+
