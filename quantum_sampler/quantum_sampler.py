@@ -5,6 +5,7 @@ from utils.tools import get_simulated_sampler
 from operations.simple_operations import quantum_sigmoid_sum, multiplication, matrix_vector_multiplication
 import hybrid
 from hybrid.reference.kerberos import KerberosSampler
+import dimod
 
 
 class Quantum_Sampler:
@@ -42,10 +43,11 @@ class Quantum_Sampler:
             x_next.append("t0_target" + str(i))
 
         # ensure to pick one
-        for i in range(len(x_next)):
-            for j in range(i+1, len(x_next)):
-                self.bqm.add_interaction(x_next[i], x_next[j], self.c_y)
-
+        #for i in range(len(x_next)):
+        #    for j in range(i, len(x_next)):
+        #        self.bqm.add_interaction(x_next[i], x_next[j], self.c_y)
+        self.bqm.update(dimod.generators.combinations(x_next, 1,
+                                                  strength=self.c_y))
         return x_next
 
     def build_t(self, x_names, t_index):
@@ -66,9 +68,11 @@ class Quantum_Sampler:
             x_next.append(prefix + "_target" + str(i))
 
         # pick one for each timestep
-        for i in range(len(x_next)):
-            for j in range(i+1, len(x_next)):
-                self.bqm.add_interaction(x_next[i], x_next[j], self.c_y)
+        #for i in range(len(x_next)):
+        #    for j in range(len(x_next)):
+        #        self.bqm.add_interaction(x_next[i], x_next[j], self.c_y)
+        self.bqm.update(dimod.generators.combinations(x_next, 1,
+                                                      strength=self.c_y))
         return x_next
 
     def join_steps(self, prev, next):
@@ -88,7 +92,6 @@ class Quantum_Sampler:
         return read_values
 
     def read_result(self, result, read_values):
-        print(read_values)
         f = None
         if self.is_write_result:
             f = open("./results/output.txt", "w")

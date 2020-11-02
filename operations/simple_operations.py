@@ -69,7 +69,6 @@ def multiplication(bqm, name1, name2, val1, val2, c_reinforcement=variables.c_xn
 def matrix_vector_multiplication(bqm, matrix_names, weights, arr_names, arr_value=None, c_reinforcement=variables.c_xnor):
     if arr_value is None:
         arr_value = [0.0 for _ in range(len(weights[0]))]
-    print(len(matrix_names[0]), len(arr_names))
     assert len(matrix_names[0]) == len(arr_names)
 
     result = []

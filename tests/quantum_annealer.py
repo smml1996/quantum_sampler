@@ -22,12 +22,13 @@ def test1():
             b = b[1][0]
             rnn_sampler = Quantum_Sampler(2, w, x, b, workflow="simulated")
             annealed = rnn_sampler.execute()
+            print(annealed)
             score += compare_answers(annealed, 2, w, x, b)
 
     print(score/((iterations - 1)*subtests))
 
 
-def test1():
+def test2():
     '''
     using simple connection between timesteps
     :return:
