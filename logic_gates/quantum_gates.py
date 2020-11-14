@@ -7,12 +7,13 @@ def quantum_not(bqm, name, val1):
     return [new_name]
 
 
-def xnor(bqm, name1, name2, w, x=-1, c_reinforcement=c_xnor):
+def xnor(bqm, name1, name2, w, x=-1, c_reinforcement=c_xnor, unknown_x=False, previous_x=None, c_t=None):
     # turn variable x propitious to Ising model
-    if x <= 0:
-        x = -1
-    else:
-        x = 1
+    if not unknown_x:
+        if x <= 0:
+            x = -1
+        else:
+            x = 1
 
     # define names for ancillas
     name_ancilla1 = "an1-" + name1 + "-" + name2
@@ -23,13 +24,17 @@ def xnor(bqm, name1, name2, w, x=-1, c_reinforcement=c_xnor):
 
     # add operands
     bqm.add_variable(name1, -2*w)
-    bqm.add_variable(name2, -2 * x * abs(w))
-
+    if not unknown_x:
+        bqm.add_variable(name2, -2 * x * abs(w))
+    else:
+        bqm.add_interaction(name2, previous_x, c_t)
 
 
     # add and define negated operands
     negated1 = quantum_not(bqm, name1, 2*w)[0]
     negated2 = quantum_not(bqm, name2, 2 * x * abs(w))[0]
+    if unknown_x:
+        bqm.add_interaction(negated2, previous_x, c_t)
 
     # add ancillas
     bqm.add_variable(name_ancilla1, -abs(w))

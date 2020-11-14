@@ -39,8 +39,8 @@ def sum_simulated_test():
     #f.write("num. of qubits; precision\n")
 
 
-    computable_qubits = 27
-    num_subtest = 1000
+    computable_qubits = 18
+    num_subtest = 10
 
     acum_precision = 0
     coeffs = []

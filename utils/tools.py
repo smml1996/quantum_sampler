@@ -20,6 +20,9 @@ def get_bqm():
 
 
 def get_simulated_sampler():
+
+
+#    return dimod.ExactSolver()
     return neal.SimulatedAnnealingSampler()
 
 
@@ -109,9 +112,18 @@ def evaluate_rnn(t, w, x, b):
     return ans
 
 
-def get_score(real, annealed):
-    assert(len(real) == len(annealed))
-    assert(len(real[0]) == len(annealed[0]))
+def compare_answers(annealed, real):
+    try:
+        a = annealed[0]
+    except:
+        annealed = annealed.outputs
+        annealed = annealed[1:]
+    real = real.outputs
+    real = real[1:]
+    #print(real)
+    #print(annealed)
+    assert (len(real) == len(annealed))
+    assert (len(real[0]) == len(annealed[0]))
 
     score = 0.0
 
@@ -122,12 +134,7 @@ def get_score(real, annealed):
             elif annealed[i][j] == -1:
                 score += 1
 
-    return score/(len(real) * len(real[0]))
-
-
-def compare_answers(annealed, t, w, x, b):
-    real = evaluate_rnn(t, w, x, b)
-    return get_score(real, annealed)
+    return score / (len(real) * len(real[0]))
 
 
 

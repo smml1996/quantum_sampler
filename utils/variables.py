@@ -5,11 +5,11 @@ from dwave.cloud import Client
 import neal
 
 # Proposal constants
-# best c_y = 100000000 -> 0.84
+# best c_y = 10000000000 -> 0.84
 c_y = 10000000000
-c_summation = 0.25
-c_xnor = -0.25
-c_t = -1000000.0
+c_summation = 0.75
+c_xnor = -9
+c_t = -0.5
 
 # utils
 letters = string.ascii_letters

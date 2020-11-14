@@ -50,7 +50,7 @@ class Quantum_Sampler:
                                                   strength=self.c_y))
         return x_next
 
-    def build_t(self, x_names, t_index):
+    def build_t(self, x_names, t_index, previous):
         prefix = str(t_index)
         xt = [0 for _ in self.x]
         # x_names = get_names(xt, prefix + "x")
@@ -58,7 +58,8 @@ class Quantum_Sampler:
         matrix_names = get_names(self.weights, prefix + "w")
 
         # perform multiplication
-        operands = matrix_vector_multiplication(self.bqm, matrix_names, self.weights, x_names, arr_value=xt)[0]
+        operands = matrix_vector_multiplication(self.bqm, matrix_names, self.weights, x_names, arr_value=xt,
+                                                unknown_x=True, previous_x=previous, c_t=self.c_t)[0]
         x_next = []
 
         # perform summation
@@ -87,7 +88,7 @@ class Quantum_Sampler:
             prefix = str(i+1)
             x_names = get_names([0 for _ in self.x], prefix + "x")
             self.join_steps(x_next, x_names)
-            x_next = self.build_t(x_names, i)
+            x_next = self.build_t(x_names, i, x_next)
             read_values.append(x_next)
         return read_values
 

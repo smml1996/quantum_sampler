@@ -10,12 +10,12 @@ from utils.variables import qpu
 from tests.simple_operations import sign_extraction_test, quantum_sign_test, simulated_mult_sum
 # from tests.simple_operations import sum_quantum_test
 from quantum_sampler.quantum_sampler import Quantum_Sampler
-from tests.quantum_annealer import test1
+from tests.quantum_annealer import test1, test2
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     #print(qpu.sampler)
-    seed(11)
+    seed(7)
     # TESTS
 
     # longest_run_sum()
@@ -32,5 +32,6 @@ if __name__ == '__main__':
     # qs = Quantum_Sampler(1, [[1]], [1], [1])
     # qs.execute()
     test1()
+    # test2()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

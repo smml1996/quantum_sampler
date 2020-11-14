@@ -61,12 +61,12 @@ def quantum_sigmoid_sum(bqm, operands, name_target, set_operands=True, c_summati
     strong_summation(bqm, operands, name_target)
 
 
-def multiplication(bqm, name1, name2, val1, val2, c_reinforcement=variables.c_xnor):
-    return xnor(bqm, name1, name2, val1, val2, c_reinforcement)
+def multiplication(bqm, name1, name2, val1, val2, c_reinforcement=variables.c_xnor, unknown_x=False, previous_x=None, c_t=None):
+    return xnor(bqm, name1, name2, val1, val2, c_reinforcement, unknown_x, previous_x, c_t)
 
 
 # matrix operations
-def matrix_vector_multiplication(bqm, matrix_names, weights, arr_names, arr_value=None, c_reinforcement=variables.c_xnor):
+def matrix_vector_multiplication(bqm, matrix_names, weights, arr_names, arr_value=None, c_reinforcement=variables.c_xnor, unknown_x=False, previous_x=None, c_t=None):
     if arr_value is None:
         arr_value = [0.0 for _ in range(len(weights[0]))]
     assert len(matrix_names[0]) == len(arr_names)
@@ -78,8 +78,13 @@ def matrix_vector_multiplication(bqm, matrix_names, weights, arr_names, arr_valu
         for j in range(len(matrix_names[0])):
             # bqm.add_variable(matrix_names[i][j], weights[i][j])
             # bqm.add_variable(arr_names[j], arr_value[j])
-            temp_res = multiplication(bqm, matrix_names[i][j], arr_names[j], weights[i][j], arr_value[j],
-                                      c_reinforcement=c_reinforcement)
+            if previous_x is None:
+                temp_res = multiplication(bqm, matrix_names[i][j], arr_names[j], weights[i][j], arr_value[j],
+                                      c_reinforcement=c_reinforcement, unknown_x=unknown_x)
+            else:
+                temp_res = multiplication(bqm, matrix_names[i][j], arr_names[j], weights[i][j], arr_value[j],
+                                          c_reinforcement=c_reinforcement, unknown_x=unknown_x,
+                                          previous_x=previous_x[j], c_t=c_t)
             operands[temp_res[0]] = weights[i][j]
 
         result.append(operands)
