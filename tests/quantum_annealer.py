@@ -37,7 +37,7 @@ def test1():
             #print("len real: ",len(temp_real))
             rnn_sampler = Quantum_Sampler(timesteps, w, x, b, workflow="simulated")
             annealed = rnn_sampler.execute()
-            # print(annealed)
+            print(annealed)
             #print( "print reversed: ",Sampler().decode_reverse(w,x,b, annealed))
             #print(annealed)
             temp_prob_anneal = Sampler().decode_reverse(w,x,b, annealed)
