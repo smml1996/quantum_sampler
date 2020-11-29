@@ -111,20 +111,7 @@ def evaluate_rnn(t, w, x, b):
         last = actual
     return ans
 
-
-def compare_answers(annealed, real):
-    try:
-        a = annealed[0]
-    except:
-        annealed = annealed.outputs
-        annealed = annealed[1:]
-    real = real.outputs
-    real = real[1:]
-    #print(real)
-    #print(annealed)
-    assert (len(real) == len(annealed))
-    assert (len(real[0]) == len(annealed[0]))
-
+def get_dec_score(annealed, real):
     score = 0.0
 
     for i in range(len(real)):
@@ -135,6 +122,36 @@ def compare_answers(annealed, real):
                 score += 1
 
     return score / (len(real) * len(real[0]))
+def compare_answers(annealed, real):
+    try:
+        a = annealed[0]
+        actual_score = 0
+        for dec in real:
+            temp = dec.outputs[1:]
+            actual_score = max(actual_score, get_dec_score(annealed, temp))
+        return actual_score
+
+    except:
+        annealed = annealed.outputs
+        annealed = annealed[1:]
+        actual_score = 0
+        for dec in real:
+            temp = dec.outputs[1:]
+            actual_score = max(actual_score, get_dec_score(annealed, temp))
+        return actual_score
+
+    # return get_dec_score(annealed, real[0].outputs[1:])
+    #real = real[1:]
+    #print(real)
+    #print(annealed)
+
+    #assert (len(real) == len(annealed))
+    #assert (len(real[0]) == len(annealed[0]))
+
+
+
+
+
 
 
 

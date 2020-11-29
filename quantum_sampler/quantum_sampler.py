@@ -78,7 +78,11 @@ class Quantum_Sampler:
 
     def join_steps(self, prev, next):
         for i in range(len(prev)):
+            #self.bqm.add_variable(prev[i], -10)
             self.bqm.add_interaction(prev[i], next[i], self.c_t)
+            #for j in range(i+1, len(prev)):
+
+            #     self.bqm.add_interaction(prev[i], next[j], -self.c_t)
 
     def build_model(self):
         read_values = []

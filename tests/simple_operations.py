@@ -7,7 +7,7 @@ from utils.variables import qpu, chimera_columns, chimera_rows, tile_shores, abs
 from utils import variables
 from operations.simple_operations import quantum_sigmoid_sum, multiplication, matrix_vector_multiplication
 import statistics
-
+from utils.tools import get_names
 
 def longest_run_sum():
     f = open("./results/longest_run.txt", "w")
@@ -229,9 +229,13 @@ def simulated_mult_sum():
             bqm = get_bqm()
             m = i
             matrix_names, weights = get_random_matrix(1, m, False)
-            x_names, x = get_random_matrix(1, m, True)
-            x_names = x_names[0]
-            x = x[0]
+            #x_names, x = get_random_matrix(1, m, True)
+            #x_names = x_names[0]
+            #x = x[0]
+
+            x = get_random_matrix(1, m, True)
+            x = x[1][0]
+            x_names = get_names(x, "x")
 
             real_result = 0
             for ii in range(m):
@@ -250,7 +254,7 @@ def simulated_mult_sum():
             quantum_sigmoid_sum(bqm, operands, "target", set_operands=False)
             sampler = get_simulated_sampler()
 
-            result = sampler.sample(bqm, num_reads=1000)
+            result = sampler.sample(bqm, num_reads=100)
 
             if result.first.sample["target"] == real_result:
                 precision += 1
@@ -284,10 +288,16 @@ def simulated_mult_sum_avg():
                 for j in range(num_subtests):
                     bqm = get_bqm()
                     m = i
-                    matrix_names, weights = get_random_matrix(1, m, False)
-                    x_names, x = get_random_matrix(1, m, True)
-                    x_names = x_names[0]
-                    x = x[0]
+                    #matrix_names, weights = get_random_matrix(1, m, False)
+                    #x_names, x = get_random_matrix(1, m, True)
+                    #x_names = x_names[0]
+                    #x = x[0]
+                    weights = get_random_matrix(1, m)
+                    weights = weights[1]
+                    matrix_names = get_names(weights, "w")
+                    x = get_random_matrix(1, m, True)
+                    x = x[1][0]
+                    x_names = get_names(x, "x")
 
                     real_result = 0
                     for ii in range(m):
@@ -306,7 +316,7 @@ def simulated_mult_sum_avg():
                     quantum_sigmoid_sum(bqm, operands, "target", set_operands=False, c_summation=c2)
                     sampler = get_simulated_sampler()
 
-                    result = sampler.sample(bqm, num_reads=1000)
+                    result = sampler.sample(bqm, num_reads=1000, chain_strengh=500)
 
                     if result.first.sample["target"] == real_result:
                         precision += 1
@@ -326,10 +336,17 @@ def quantum_mult_sum():
         for j in range(num_subtests):
             bqm = get_bqm()
             m = i
-            matrix_names, weights = get_random_matrix(1, m, False)
-            x_names, x = get_random_matrix(1, m, True)
-            x_names = x_names[0]
-            x = x[0]
+            #matrix_names, weights = get_random_matrix(1, m, False)
+            #x_names, x = get_random_matrix(1, m, True)
+            #x_names = x_names[0]
+            #x = x[0]
+
+            weights = get_random_matrix(1, m)
+            weights = weights[1]
+            matrix_names = get_names(weights, "w")
+            x = get_random_matrix(1, m, True)
+            x = x[1][0]
+            x_names = get_names(x, "x")
 
             real_result = 0
             for ii in range(m):
@@ -345,10 +362,10 @@ def quantum_mult_sum():
 
             operands = matrix_vector_multiplication(bqm, matrix_names, weights, x_names, arr_value=x)[0]
 
-            quantum_sigmoid_sum(bqm, operands, "target", set_operands=False)
+            quantum_sigmoid_sum(bqm, operands[0], "target", set_operands=False)
             sampler = EmbeddingComposite(qpu)
 
-            result = sampler.sample(bqm, num_reads=1200)
+            result = sampler.sample(bqm, num_reads=100, chain_strength=100000)
 
             if result.first.sample["target"] == real_result:
                 precision += 1

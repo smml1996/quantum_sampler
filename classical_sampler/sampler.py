@@ -1,14 +1,18 @@
 import math
 import copy
 import random
+from math import tanh
 def sigmoid(x):
-    x/= 100
-    return 1 / (1 + math.exp(-x))
+    #return x
+    x /= 1000
+    return tanh(x)
+
+    # return 1 / (1 + math.exp(-x))
 
 
 class Result:
 
-    def __init__(self, output=None, probability=1.0, vec_outputs=None):
+    def __init__(self, output=None, probability=0.0, vec_outputs=None):
         self.outputs = []
         if output is not None:
             self.outputs.append(output)
@@ -22,7 +26,7 @@ class Result:
 
     def add_output(self, probability, timestep_output):
         self.outputs.append(timestep_output)
-        self.probability *= probability
+        self.probability += probability
 
 
 def evaluate_affine(w, x, b):
@@ -33,7 +37,7 @@ def evaluate_affine(w, x, b):
             suma += x[i] * row[i]
         suma += b[len(temp)]
         temp.append(sigmoid(suma))
-
+    # print(temp)
     return temp
 
 
@@ -68,13 +72,19 @@ class Sampler:
             res.sort(reverse=True, key=get_score)
         else:
             random.shuffle(res)
+
+        #ponis = 0
+        #for r in res:
+        #    ponis+=r.probability
+        #print(ponis)
+
         if beam_size == -1:
             return res
 
         return res[:beam_size]
 
     def sample(self, w, x, b, t, beam_size=-1, is_sort=True):
-        decodings = [Result(output=x)]
+        decodings = [Result(output=x, probability=1.0)]
         #for dec in decodings:
          #   print(dec.outputs)
 
@@ -87,6 +97,17 @@ class Sampler:
             #print("############")
             #for dec in decodings:
             #    print(dec.outputs)
+        decodings.sort(reverse=True, key=get_score)
+        #print("ponis: ",len(x) ,len(decodings))
+        if beam_size == -1:
+            target_prob = decodings[0].probability
+            return_decs = []
+            for dec in decodings:
+                if dec.probability == target_prob:
+                    return_decs.append(dec)
+            print("ratio answers: ", str(len(return_decs)/len(decodings)))
+            return_decs.sort(reverse=True, key=get_score)
+            return return_decs
         return decodings
 
     def get_probability(self, annealed, decodings):
@@ -95,3 +116,18 @@ class Sampler:
             if dec.outputs[1:] == annealed:
                 return dec.probability
         return 0.0
+
+
+    def decode_reverse(self, w, x, b, annealed):
+        prob = 0.0
+
+        temp = x
+        for step in annealed:
+            temp = evaluate_affine(w, temp, b)
+            for index, elem in enumerate(step):
+                if elem == 1:
+                    prob += temp[index]
+                    break
+            temp = step
+
+        return prob + 1

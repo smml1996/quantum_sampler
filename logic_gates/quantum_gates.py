@@ -4,6 +4,10 @@ import dimod
 def quantum_not(bqm, name, val1):
     new_name = "n-" + name
     bqm.add_variable(new_name, val1)
+
+    # force qubits to have diff. signs
+    bqm.add_interaction(new_name, name, 1)
+
     return [new_name]
 
 
@@ -26,15 +30,15 @@ def xnor(bqm, name1, name2, w, x=-1, c_reinforcement=c_xnor, unknown_x=False, pr
     bqm.add_variable(name1, -2*w)
     if not unknown_x:
         bqm.add_variable(name2, -2 * x * abs(w))
-    else:
-        bqm.add_interaction(name2, previous_x, c_t)
+    #else:
+    #    bqm.add_interaction(name2, previous_x, c_t)
 
 
     # add and define negated operands
     negated1 = quantum_not(bqm, name1, 2*w)[0]
     negated2 = quantum_not(bqm, name2, 2 * x * abs(w))[0]
     if unknown_x:
-        bqm.add_interaction(negated2, previous_x, c_t)
+        bqm.add_interaction(negated2, previous_x, -c_t)
 
     # add ancillas
     bqm.add_variable(name_ancilla1, -abs(w))
