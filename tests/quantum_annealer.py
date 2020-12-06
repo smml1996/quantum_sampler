@@ -34,7 +34,6 @@ def test1():
             b = get_random_matrix(1, m, False)
             b = b[1][0]
             temp_real = Sampler().sample(w, x, b, timesteps, -1)
-            #print("len real: ",len(temp_real))
             rnn_sampler = Quantum_Sampler(timesteps, w, x, b, workflow="simulated")
             annealed = rnn_sampler.execute()
             print(annealed)
@@ -45,7 +44,7 @@ def test1():
             print('annealed: ', temp_prob_anneal)
             real = temp_real
             print('real: ', real[0].probability)
-            beam = beam_sampler.sample(w, x, b, timesteps, beam_size=1 )[0]
+            beam = beam_sampler.sample(w, x, b, timesteps, beam_size=1)[0]
             print('beam: ',  beam.probability)
             print('')
             probs_beam += beam.probability
@@ -77,15 +76,15 @@ def test2():
     score = 0
     score_beam = 0
     iterations = 6
-    subtests = 1
+    subtests = 3
     timesteps = 2
     beam_sampler = Sampler()
     probs_beam = 0.0
     probs_anneal = 0.0
-    for m in range(512, 1025, 512):
+    for m in range(2, 4+1):
         score_subtests = 0
         score_sub_beam = 0
-        for i in range(subtests):
+        for i in range(3):
             w = get_random_matrix(m, m)
             w = w[1]
 
@@ -97,8 +96,13 @@ def test2():
             #temp_real = Sampler().sample(w, x, b, timesteps, -1)
             # print("len real: ",len(temp_real))
             rnn_sampler = Quantum_Sampler(timesteps, w, x, b, workflow="kerberos")
-            print("finish building model")
-            annealed = rnn_sampler.execute()
+            read_values = rnn_sampler.build_model()
+
+            sampler = EmbeddingComposite(qpu)
+            res = sampler.sample(rnn_sampler.bqm, num_reads=10, chain_strength=10000)
+            annealed = rnn_sampler.read_result(res.first.sample, read_values)
+            # annealed = rnn_sampler.execute()
+            print(annealed)
             # print( "print reversed: ",Sampler().decode_reverse(w,x,b, annealed))
             print("sampler done")
 
@@ -107,17 +111,20 @@ def test2():
             print('annealed: ', temp_prob_anneal)
             #real = temp_real
             #print('real: ', real[0].probability)
-            beam = beam_sampler.sample(w, x, b, timesteps, beam_size=1)[0]
+            beam = beam_sampler.sample(w, x, b, timesteps, beam_size=1, is_sort=False)[0]
             print('beam: ', beam.probability)
-            print('')
+
             probs_beam += beam.probability
-            #temp = compare_answers(annealed, real)
-            #temp2 = compare_answers(beam, real)
-            #score_sub_beam += temp2
-            #score_subtests += temp
-            #score += temp
-            #score_beam += temp2
-            f.write(str(m) + "," + str(temp_prob_anneal) + "," + str(beam.probability) + "\n")
+            real = Sampler().sample(w, x, b, timesteps, -1)
+            print("real:", real[0].probability)
+            temp = compare_answers(annealed, real)
+            temp2 = compare_answers(beam, real)
+            score_sub_beam += temp2
+            score_subtests += temp
+            score += temp
+            score_beam += temp2
+            f.write(str(m) + "," + str(temp_prob_anneal) + "," + str(beam.probability) + str(real[0].probability) + "\n")
+            print('')
         score_subtests /= subtests
         score_sub_beam /= subtests
         print(score_subtests)

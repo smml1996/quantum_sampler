@@ -4,7 +4,7 @@ import random
 from math import tanh
 def sigmoid(x):
     #return x
-    x /= 1000
+    x /= 10000
     return tanh(x)
 
     # return 1 / (1 + math.exp(-x))
