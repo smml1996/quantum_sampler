@@ -6,7 +6,7 @@ def quantum_not(bqm, name, val1):
     bqm.add_variable(new_name, val1)
 
     # force qubits to have diff. signs
-    # bqm.add_interaction(new_name, name, 0.25)
+    bqm.add_interaction(new_name, name, 0.25)
 
     return [new_name]
 

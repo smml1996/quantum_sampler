@@ -44,7 +44,7 @@ def test1():
             print('annealed: ', temp_prob_anneal)
             real = temp_real
             print('real: ', real[0].probability)
-            beam = beam_sampler.sample(w, x, b, timesteps, beam_size=1)[0]
+            beam = beam_sampler.sample(w, x, b, timesteps, beam_size=1, is_sort=False)[0]
             print('beam: ',  beam.probability)
             print('')
             probs_beam += beam.probability

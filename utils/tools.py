@@ -32,7 +32,8 @@ def get_random_identifier(length=10):
 
 
 def get_random_number():
-    return randint(-variables.abs_numbers_range, variables.abs_numbers_range)
+    return randint(1, variables.abs_numbers_range)
+    #return randint(-variables.abs_numbers_range, variables.abs_numbers_range)
 
 
 def get_random_matrix(n, m, is_binary=False):

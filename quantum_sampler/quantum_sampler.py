@@ -36,11 +36,18 @@ class Quantum_Sampler:
         operands = matrix_vector_multiplication(self.bqm, matrix_names, self.weights, x_names, arr_value=self.x)[0]
         x_next = []
 
+        #copy for next timestep
+        x_next_copy = []
+
         # perform summation
         for i in range(len(operands)):
             operands[i]["t0_b" + str(i)] = self.bias[i]
             quantum_sigmoid_sum(self.bqm, operands[i], "t0_target" + str(i), set_operands=False)
+            quantum_sigmoid_sum(self.bqm, operands[i], "t0_target_c" + str(i), set_operands=False)
             x_next.append("t0_target" + str(i))
+            x_next_copy.append("t0_target_c" + str(i))
+
+
 
         # ensure to pick one
         #for i in range(len(x_next)):
@@ -48,11 +55,12 @@ class Quantum_Sampler:
         #        self.bqm.add_interaction(x_next[i], x_next[j], self.c_y)
         self.bqm.update(dimod.generators.combinations(x_next, 1,
                                                   strength=self.c_y))
-        return x_next
+
+        return x_next, x_next_copy
 
     def build_t(self, t_index, previous):
         prefix = str(t_index)
-        xt = [-1 for _ in self.x]
+        xt = [-100 for _ in self.x]
         # x_names = get_names(xt, prefix + "x")
         # x_names = x_names[0]
         matrix_names = get_names(self.weights, prefix + "w")
@@ -61,11 +69,18 @@ class Quantum_Sampler:
         operands = matrix_vector_multiplication(self.bqm, matrix_names, self.weights, previous, arr_value=xt)[0]
         x_next = []
 
+        # copy for next timestep
+        x_next_copy = []
+
         # perform summation
         for i in range(len(operands)):
             operands[i]["t"+str(t_index)+"_b" + str(i)] = self.bias[i]
             quantum_sigmoid_sum(self.bqm, operands[i], prefix + "_target" + str(i), set_operands=False)
+            quantum_sigmoid_sum(self.bqm, operands[i], prefix + "_target_c" + str(i), set_operands=False)
             x_next.append(prefix + "_target" + str(i))
+            x_next_copy.append(prefix + "_target_c" + str(i))
+
+
 
         # pick one for each timestep
         #for i in range(len(x_next)):
@@ -73,7 +88,7 @@ class Quantum_Sampler:
         #        self.bqm.add_interaction(x_next[i], x_next[j], self.c_y)
         self.bqm.update(dimod.generators.combinations(x_next, 1,
                                                       strength=self.c_y))
-        return x_next
+        return x_next, x_next_copy
 
     def join_steps(self, prev, next):
         for i in range(len(prev)):
@@ -85,13 +100,13 @@ class Quantum_Sampler:
 
     def build_model(self):
         read_values = []
-        x_next = self.build_t0()
+        x_next, x_next_copy = self.build_t0()
         read_values.append(x_next)
         for i in range(self.timesteps-1):
             prefix = str(i+1)
             #x_names = get_names([-1 for _ in self.x], prefix + "x")
             #self.join_steps(x_next, x_names)
-            x_next = self.build_t(i, x_next)
+            x_next, x_next_copy = self.build_t(i, x_next_copy)
             read_values.append(x_next)
         return read_values
 
