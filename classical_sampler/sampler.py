@@ -115,19 +115,30 @@ class Sampler:
         for dec in decodings:
             if dec.outputs[1:] == annealed:
                 return dec.probability
-        return 0.0
+        return 0
 
 
     def decode_reverse(self, w, x, b, annealed):
         prob = 0.0
 
         temp = x
+        index_c = -1
+        max_prob = -1
         for step in annealed:
             temp = evaluate_affine(w, temp, b)
+            max_prob = 0
+            index_c=-1
             for index, elem in enumerate(step):
+                max_prob = 0
+                index_c = -1
                 if elem == 1:
-                    prob += temp[index]
-                    break
+                    if temp[index] > max_prob:
+                        max_prob = temp[index]
+                        index_c = index
+                    #prob += temp[index]
+                    #index_c = index
+                    #break
             temp = step
+            prob += max_prob
 
-        return prob + 1
+        return prob+1

@@ -6,7 +6,7 @@ def quantum_not(bqm, name, val1):
     bqm.add_variable(new_name, val1)
 
     # force qubits to have diff. signs
-    bqm.add_interaction(new_name, name, 0.25)
+    #bqm.add_interaction(new_name, name, 0.25)
 
     return [new_name]
 
@@ -35,7 +35,7 @@ def xnor(bqm, name1, name2, w, x=-1, c_reinforcement=c_xnor, unknown_x=False, pr
 
     # add and define negated operands
     negated1 = quantum_not(bqm, name1, 2*w)[0]
-    negated2 = quantum_not(bqm, name2, 2 * x * abs(w))[0]
+    negated2 = quantum_not(bqm, name2, 2* x * abs(w))[0]
     #if unknown_x:
     #    bqm.add_interaction(negated2, previous_x, -c_t)
 

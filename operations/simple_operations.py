@@ -8,7 +8,7 @@ Operands do not contain target!!!
 """
 
 
-def weak_summation(bqm, operands, c_summation=variables.c_summation):
+def weak_summation(bqm, operands, c_summation=variables.c_summation, enhance=False):
     """
     This function uses an environment variable c_summation that ensures
     that make qubits "agree" with each other.
@@ -21,10 +21,13 @@ def weak_summation(bqm, operands, c_summation=variables.c_summation):
     temp_operands = list(operands.items())
     for i in range(len(temp_operands)):
         for j in range(i + 1, len(temp_operands)):
+
             bqm.add_interaction(temp_operands[i][0], temp_operands[j][0], c_summation)
 
 
-def strong_summation(bqm, operands, target):
+
+
+def strong_summation(bqm, operands, target, enhance):
     """
     This uses the own qubit weight to establish entanglement towards a target qubit.
 
@@ -34,12 +37,19 @@ def strong_summation(bqm, operands, target):
     :param target: string, qubit name where the result is saved
     :return: bqm with entanglements between operands and target qubit
     """
+
     for key, value in operands.items():
         if key != target:
-            bqm.add_interaction(key, target, -abs(value))
+            if not enhance:
+                bqm.add_interaction(key, target, -abs(value))
+            else:
+                bqm.add_interaction(key, target, -0.7*abs(value)-abs(value))
 
 
-def quantum_sigmoid_sum(bqm, operands, name_target, set_operands=True, c_summation=variables.c_summation):
+
+
+
+def quantum_sigmoid_sum(bqm, operands, name_target, set_operands=True, c_summation=variables.c_summation, enhance=False):
     """
     it sets the operands force fields, to later apply weak summation
     and strong summation
@@ -52,13 +62,18 @@ def quantum_sigmoid_sum(bqm, operands, name_target, set_operands=True, c_summati
     """
     if set_operands:
         for key, value in operands.items():
-            bqm.add_variable(key, -value)
+            if not enhance:
+                bqm.add_variable(key, -value)
+            else:
+                bqm.add_variable(key, value)
+
+
 
     # put target in perfect superposition state
     bqm.add_variable(name_target, 0.0)
 
-    weak_summation(bqm, operands, c_summation=c_summation)
-    strong_summation(bqm, operands, name_target)
+    weak_summation(bqm, operands, c_summation=c_summation, enhance=enhance)
+    strong_summation(bqm, operands, name_target, enhance=enhance)
 
 
 def multiplication(bqm, name1, name2, val1, val2, c_reinforcement=variables.c_xnor, unknown_x=False, previous_x=None, c_t=None):

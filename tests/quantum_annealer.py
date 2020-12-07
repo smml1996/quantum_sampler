@@ -40,11 +40,14 @@ def test1():
             #print( "print reversed: ",Sampler().decode_reverse(w,x,b, annealed))
             #print(annealed)
             temp_prob_anneal = Sampler().decode_reverse(w,x,b, annealed)
+            if temp_prob_anneal == 1:
+                continue
             probs_anneal += temp_prob_anneal
+
             print('annealed: ', temp_prob_anneal)
             real = temp_real
             print('real: ', real[0].probability)
-            beam = beam_sampler.sample(w, x, b, timesteps, beam_size=1, is_sort=False)[0]
+            beam = beam_sampler.sample(w, x, b, timesteps, beam_size=1)[0]
             print('beam: ',  beam.probability)
             print('')
             probs_beam += beam.probability

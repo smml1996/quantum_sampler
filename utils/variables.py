@@ -7,8 +7,8 @@ import neal
 # Proposal constants
 # best c_y = 10000000000 -> 0.84
 c_y = 10000
-c_summation = 0.25
-c_xnor = -0.55
+c_summation = 0.75
+c_xnor = -1
 c_t = -1
 #c_y = 10000000000
 #c_t = -1000000.0
